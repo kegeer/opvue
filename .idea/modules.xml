@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/opmd.iml" filepath="$PROJECT_DIR$/.idea/opmd.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/opvue.iml" filepath="$PROJECT_DIR$/.idea/opvue.iml" />
     </modules>
   </component>
 </project>

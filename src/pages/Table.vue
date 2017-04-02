@@ -75,13 +75,13 @@
           <tr>
             <td>教育程度</td>
             <td colspan="5">
-              <input type="radio" id="j_s_1" value="1" v-model="patient.baseinfo.job_status">
+              <input type="radio" id="e_s_1" value="1" v-model="patient.baseinfo.job_status">
               <label for="j_s_1">小学</label>
-              <input type="radio" id="j_s_2" value="2" v-model="patient.baseinfo.job_status">
+              <input type="radio" id="e_s_2" value="2" v-model="patient.baseinfo.job_status">
               <label for="j_s_2">中学</label>
-              <input type="radio" id="j_s_3" value="3" v-model="patient.baseinfo.job_status">
+              <input type="radio" id="e_s_3" value="3" v-model="patient.baseinfo.job_status">
               <label for="j_s_3">大学或以上</label>
-              <input type="radio" id="j_s_0" value="0" v-model="patient.baseinfo.job_status">
+              <input type="radio" id="e_s_0" value="0" v-model="patient.baseinfo.job_status">
               <label for="j_s_0">其它</label>
             </td>
           </tr>
@@ -294,30 +294,36 @@
         <th>部 位<br>(详述具体部位)</th>
         <th>填写格式:<br>最长径(mm) x 与最长径垂直的最长径(mm)</th>
         <th>分型</th>
+        <th>图片</th>
+        <th>癌变</th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      <tr>
-        <td><input type="text"></td>
+      <tr v-for="site in patient.olk.sites">
+        <td><input type="text" v-model="site.site" class="form-control"></td>
         <td>
-          <input type="text"> x <input type="text">
+          <input type="text" v-model="site.s_long" class="form-control"> x <input type="text" v-model="site.s_wide" class="form-control">
         </td>
         <td>
-          <select v-model="selected">
+          <select v-model="site.type">
             <option v-for="type in types" :value="type.value">
               {{ type.text }}
             </option>
           </select>
         </td>
         <td>
-          <button class="btn btn-danger btn-sm"><i class="fa fa-times"></i></button>
+          <!-- <input type="file" v-model="site.img"> -->
+        </td>
+        <td>
+          <input type="checkbox" v-model="site.cancer">
+        </td>
+        <td>
+          <button class="btn btn-danger btn-sm" @click.prevent="removeOlkSiteLine(site)"><i class="fa fa-times"></i></button>
         </td>
       </tr>
       <tr>
-        <td colspan="2">
-          <button class="btn btn-primary btn-sm"><i class="fa fa-plus"></i></button>
-        </td>
+        <button class="btn btn-primary btn-sm" @click.prevent="addOlkSiteLine"><i class="fa fa-plus"></i></button>
       </tr>
       </tbody>
     </table>
@@ -333,51 +339,61 @@
           (四分法)</th>
         <th>糜烂面积 <br>
           最长径(mm) x 与最长径垂直的最长径(mm)</th>
+          <th>图片</th>
+        <th>癌变</th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      <tr>
+      <tr v-for="site in patient.olp.sites">
         <td>
-          <select v-model="selected">
+          <select v-model="site.site">
             <option v-for="site in olp_sites" :value="site.value">
               {{ site.text }}
             </option>
           </select>
         </td>
         <td>
-          <select v-model="selected">
+          <select v-model="site.bw">
             <option v-for="quart in quarts" :value="quart.value">
               {{ quart.text }}
             </option>
           </select>
         </td>
         <td>
-          <select v-model="selected">
+          <select v-model="site.cx">
             <option v-for="quart in quarts" :value="quart.value">
               {{ quart.text }}
             </option>
           </select>
         </td>
+
         <td>
-          <input type="text"> X <input type="text">
+          <input type="text" v-model="site.ml_long" class="form-control"> X <input type="text" v-model="site.ml_wide" class="form-control">
         </td>
         <td>
-          <button class="btn btn-danger btn-sm"><i class="fa fa-times"></i></button>
+          <!-- <input type="file" v-model="site.img"> -->
+        </td>
+        <td>
+          <input type="checkbox" v-model="site.cancer">
+        </td>
+        <td>
+          <button class="btn btn-danger btn-sm" @click.prevent="removeOlpSiteLine(site)"><i class="fa fa-times"></i></button>
         </td>
       </tr>
       <tr>
-        <td colspan="5">
-          <select v-model="selected">
+        <td colspan="3">
+          <button class="btn btn-primary btn-sm" @click.prevent="addOlpSiteLine"><i class="fa fa-plus"></i></button>
+        </td>
+        <td colspan="2">
+          <select v-model="patient.olp.olp_type">
             <option v-for="type in olp_types" :value="type.value">
               {{ type.text }}
             </option>
           </select>
         </td>
-      </tr>
-      <tr>
         <td colspan="2">
-          <button class="btn btn-primary btn-sm"><i class="fa fa-plus"></i></button>
+          <input type="text" v-mode="patient.olp.ml_area">
         </td>
       </tr>
       </tbody>
@@ -394,18 +410,44 @@
       </tr>
       </thead>
       <tbody>
-      <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
+      <tr v-for="cancer in patient.result.cancers">
         <td>
-          <button class="btn btn-danger btn-sm"><i class="fa fa-times"></i></button>
+          <input type="text" v-model="cancer.site" class="form-control">
+        </td>
+        <td>
+          <select v-model="cancer.velscope">
+            <option v-for="type in cancer_types" :value="type.value">
+              {{ type.text }}
+            </option>
+          </select>
+          <br>
+          <!-- <input type="file" v-model="cancer.v_img"> -->
+        </td>
+        <td>
+          <select v-model="cancer.toluidine">
+            <option v-for="type in cancer_types" :value="type.value">
+              {{ type.text }}
+            </option>
+          </select>
+          <br>
+          <!-- <input type="file" v-model="cancer.t_img"> -->
+        </td>
+        <td>
+          <select v-model="cancer.velscope">
+            <option v-for="type in cancer_status" :value="type.value">
+              {{ type.text }}
+            </option>
+          </select>
+          <br>
+          <!-- <input type="file" v-model="cancer.b_img"> -->
+        </td>
+        <td>
+          <button class="btn btn-danger btn-sm" @click.prevent="removeCancerSiteLine(cancer)"><i class="fa fa-times"></i></button>
         </td>
       </tr>
       <tr>
         <td colspan="2">
-          <button class="btn btn-primary btn-sm"><i class="fa fa-plus"></i></button>
+          <button class="btn btn-primary btn-sm" @click.prevent="addCancerSiteLine"><i class="fa fa-plus"></i></button>
         </td>
       </tr>
       </tbody>
@@ -416,45 +458,102 @@
         <td rowspan="4">检查</td>
         <td rowspan="3">口腔局部刺激因素</td>
         <td>尖锐牙尖</td>
-        <td colspan="5"></td>
+        <td colspan="5">
+          <input type="checkbox" v-model="patient.result.sharp_teeth">
+        </td>
       </tr>
       <tr>
         <td>不良修复体</td>
-        <td colspan="5"></td>
+        <td colspan="5">
+          <input type="checkbox" v-model="patient.result.bad_fit">
+        </td>
       </tr>
       <tr>
         <td>牙结石</td>
-        <td colspan="5"></td>
+        <td colspan="5">
+          <select v-model="patient.result.calculus">
+            <option v-for="type in calculus_types" :value="type.value">
+              {{ type.text }}
+            </option>
+          </select>
+        </td>
       </tr>
       <tr>
         <td>全身检查报告</td>
         <td>血常规</td>
-        <td></td>
+        <td>
+        <input type="checkbox" v-model="patient.result.blood.has">
+        <!-- <input type="file" v-model="patient.result.blood.img"> -->
+        </td>
         <td>血糖</td>
-        <td></td>
+        <td>
+           <input type="checkbox" v-model="patient.result.blood_sugar.has">
+        <!-- <input type="file" v-model="patient.result.blood_sugar.img"> -->
+        </td>
         <td>肝肾功</td>
-        <td></td>
+        <td>
+           <input type="checkbox" v-model="patient.result.liver.has">
+        <!-- <input type="file" v-model="patient.result.liver.img"> -->
+        </td>
       </tr>
       <tr>
         <td rowspan="2" colspan="2">处理措施</td>
         <td>全身用药</td>
         <td colspan="5">
-          <input type="checkbox" v-model="checked">
+          <input type="checkbox" v-model="patient.result.sys_drug.has">
           (药名及疗程)
-          <input type="text">
+          <br>
+          <div class="input-group">
+            <div class="row" v-for="treat in patient.result.sys_drug.treats">
+              <div class="col-sm-5">
+                <input type="text" v-model="treat.drug">
+              </div>
+              <div class="col-sm-5">
+                <input type="text" v-model="treat.time">
+              </div>
+              <div class="col-sm-2">
+                <button class="btn btn-danger btn-sm" @click.prevent="removeSysTreatLine(treat)">
+                  X
+                </button>
+              </div>
+            </div>
+            <div class="row">
+              <button class="btn btn-primary btn-sm" @click.prevent="addSysTreatLine"><i class="fa fa-plus"></i></button>
+            </div>
+          </div>
         </td>
       </tr>
       <tr>
         <td>局部用药</td>
         <td colspan="5">
-          <input type="checkbox" v-model="checked">
+          <input type="checkbox" v-model="patient.result.topical_drug.has">
           (药名及疗程)
-          <input type="text">
+          <br>
+          <div class="input-group">
+            <div class="row" v-for="treat in patient.result.topical_drug.treats">
+              <div class="col-sm-5">
+                <input type="text" v-model="treat.drug">
+              </div>
+              <div class="col-sm-5">
+                <input type="text" v-model="treat.time">
+              </div>
+              <div class="col-sm-2">
+                <button class="btn btn-danger btn-sm" @click.prevent="removeTopicalTreatLine(treat)">
+                  X
+                </button>
+              </div>
+            </div>
+            <div class="row">
+              <button class="btn btn-primary btn-sm" @click.prevent="addTopicalTreatLine"><i class="fa fa-plus"></i></button>
+            </div>
+          </div>
         </td>
       </tr>
       <tr>
         <td colspan="2">备注(上述表格未包含的其他内容)</td>
-        <td colspan="6"></td>
+        <td colspan="6">
+          <textarea class="form-control" v-model="patient.result.note"></textarea>
+        </td>
       </tr>
       </tbody>
     </table>
@@ -540,7 +639,7 @@
                 cx: 0,
                 ml_long: 0,
                 ml_wide: 0,
-                site_img: '',
+                img: '',
                 cancer: 0
               }
             ]
@@ -586,7 +685,7 @@
             calculus: 0,
             sys_drug: {
               has: 0,
-              treat: [
+              treats: [
                 {
                   drug: '',
                   time: 0
@@ -595,7 +694,7 @@
             },
             topical_drug: {
               has: 0,
-              treat: [
+              treats: [
                 {
                   drug: '',
                   time: 0
@@ -648,7 +747,35 @@
           { text: '重', value: '4' },
           { text: '癌', value: '5' },
           { text: '其他', value: '6' }
+        ],
+        calculus_types: [
+          { text: '无', value: '0' },
+          { text: 'I°', value: '1' },
+          { text: 'II°', value: '2' },
+          { text: 'III°', value: '3' }
         ]
+      }
+    },
+    methods: {
+      removeOlkSiteLine (site) {
+      },
+      addOlkSiteLine () {
+      },
+      removeOlpSiteLine (site) {
+      },
+      addOlpSiteLine () {
+      },
+      removeCancerSiteLine (site) {
+      },
+      addCancerSiteLine () {
+      },
+      addSysTreatLine () {
+      },
+      removeSysTreatLine (treat) {
+      },
+      addTopicalTreatLine () {
+      },
+      removeTopicalTreatLine (treat) {
       }
     }
   }
